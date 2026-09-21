@@ -235,10 +235,10 @@ function Field({ label, required, children }: { label: string; required?: boolea
   );
 }
 
-function Picker({ value, onChange, options }: { value: string; onChange: (value: string) => void; options: string[] }) {
+function Picker({ value, onChange, options, id }: { value: string; onChange: (value: string) => void; options: string[]; id?: string }) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectTrigger id={id}><SelectValue /></SelectTrigger>
       <SelectContent>{options.map((option) => <SelectItem key={option} value={option}>{option}</SelectItem>)}</SelectContent>
     </Select>
   );
