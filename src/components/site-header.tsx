@@ -85,7 +85,17 @@ export function SiteHeader() {
                 {link.label}
               </Link>
             ))}
-            <Button className="mt-3" asChild><Link to="/datasets" onClick={() => setOpen(false)}>Explore datasets</Link></Button>
+            {user && (
+              <Link to="/submissions" onClick={() => setOpen(false)} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted">My submissions</Link>
+            )}
+            {user && isAdmin && (
+              <Link to="/admin" onClick={() => setOpen(false)} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted">Admin</Link>
+            )}
+            {user ? (
+              <Button variant="outline" className="mt-3" onClick={() => { setOpen(false); void handleSignOut(); }}>Sign out</Button>
+            ) : (
+              <Button className="mt-3" asChild><Link to="/auth" onClick={() => setOpen(false)}>Sign in</Link></Button>
+            )}
           </div>
         </nav>
       )}
