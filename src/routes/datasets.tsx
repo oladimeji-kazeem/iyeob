@@ -38,5 +38,5 @@ function DatasetsPage() {
 }
 
 function Filter({ value, onChange, options, placeholder }: { value: string; onChange: (value: string) => void; options: string[]; placeholder: string }) {
-  return <Select value={value} onValueChange={onChange}><SelectTrigger className="h-10"><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem value={option} key={option}>{option === "all" ? `All ${placeholder.toLowerCase()}s` : option[0].toUpperCase() + option.slice(1)}</SelectItem>)}</SelectContent></Select>;
+  return <Select value={value} onValueChange={onChange}><SelectTrigger className="h-10"><SelectValue placeholder={placeholder} /></SelectTrigger><SelectContent>{options.map((option) => <SelectItem value={option} key={option}>{option === "all" ? `All ${placeholder.toLowerCase()}s` : option.charAt(0).toUpperCase() + option.slice(1)}</SelectItem>)}</SelectContent></Select>;
 }
