@@ -1,12 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Search, SlidersHorizontal } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Download, FileJson, Search, SlidersHorizontal } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { AppLayout } from "@/components/app-layout";
 import { DatasetCard } from "@/components/dataset-card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { datasets } from "@/lib/datasets";
+import { trackEvent } from "@/lib/analytics";
+import { downloadCatalogSelection } from "@/lib/download";
+import { usePublishedDatasets } from "@/lib/published";
 
 export const Route = createFileRoute("/datasets/")({
   head: () => ({ meta: [
@@ -19,20 +23,49 @@ export const Route = createFileRoute("/datasets/")({
 });
 
 function DatasetsPage() {
+  const { datasets, isLoading } = usePublishedDatasets();
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState("all");
   const [task, setTask] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
   const [sort, setSort] = useState("quality");
+
+  const filters = useMemo(() => ({ domain, task, difficulty, sort }), [domain, task, difficulty, sort]);
+
   const filtered = useMemo(() => datasets.filter((dataset) => {
     const textMatch = `${dataset.title} ${dataset.domain} ${dataset.description}`.toLowerCase().includes(query.toLowerCase());
     return textMatch && (domain === "all" || dataset.domain === domain) && (task === "all" || dataset.task.includes(task)) && (difficulty === "all" || dataset.difficulty === difficulty);
-  }).sort((a, b) => sort === "rows" ? b.rows - a.rows : sort === "newest" ? b.version.localeCompare(a.version) : b.quality - a.quality), [query, domain, task, difficulty, sort]);
+  }).sort((a, b) => sort === "rows" ? b.rows - a.rows : sort === "newest" ? b.version.localeCompare(a.version) : b.quality - a.quality), [datasets, query, domain, task, difficulty, sort]);
+
+  // Log search terms and filter combinations for the admin analytics dashboard.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (query.trim()) trackEvent({ event_type: "search", search_query: query.trim(), filters });
+    }, 900);
+    return () => clearTimeout(timer);
+  }, [query, filters]);
+
+  useEffect(() => {
+    trackEvent({ event_type: "filter", filters });
+  }, [filters]);
+
+  const exportSelection = (format: "csv" | "json") => {
+    downloadCatalogSelection(filtered, format, { ...filters, ...(query.trim() ? { search: query.trim() } : {}) });
+    trackEvent({ event_type: "download", file_format: `catalog-${format}`, filters });
+    toast.success(`${filtered.length} datasets exported with citation metadata`);
+  };
 
   return <AppLayout><section className="border-b border-border bg-card"><div className="mx-auto max-w-7xl px-5 py-16 lg:px-8"><span className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">Open repository · Nigeria</span><h1 className="mt-3 font-display text-4xl font-extrabold sm:text-5xl">Synthetic datasets, clearly documented.</h1><p className="mt-5 max-w-2xl text-lg leading-7 text-muted-foreground">Discover privacy-preserving datasets for research and model development. No real personal data, ever.</p></div></section>
     <section className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
       <div className="border border-border bg-card p-4 shadow-sm"><div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search datasets, domains, or use cases" className="h-12 pl-10" aria-label="Search datasets" /></div><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><Filter value={domain} onChange={setDomain} placeholder="Domain" options={["all", ...new Set(datasets.map((d) => d.domain))]} /><Filter value={task} onChange={setTask} placeholder="Task" options={["all", "Classification", "Regression"]} /><Filter value={difficulty} onChange={setDifficulty} placeholder="Difficulty" options={["all", "Beginner", "Intermediate", "Advanced"]} /><Filter value="Nigeria" onChange={() => undefined} placeholder="Country" options={["Nigeria"]} /><Filter value={sort} onChange={setSort} placeholder="Sort" options={["quality", "rows", "newest"]} /></div></div>
-      <div className="mt-8 flex items-center justify-between"><p className="text-sm font-semibold"><span className="text-primary">{filtered.length}</span> datasets found</p><span className="flex items-center gap-2 text-xs text-muted-foreground"><SlidersHorizontal className="size-4" />Filters update instantly</span></div>
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-semibold"><span className="text-primary">{filtered.length}</span> datasets found{isLoading ? " (loading community releases…)" : ""}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="flex items-center gap-2 text-xs text-muted-foreground"><SlidersHorizontal className="size-4" />Downloads follow your filters</span>
+          <Button variant="outline" size="sm" disabled={!filtered.length} onClick={() => exportSelection("json")}><FileJson />JSON</Button>
+          <Button size="sm" disabled={!filtered.length} onClick={() => exportSelection("csv")}><Download />Download selection</Button>
+        </div>
+      </div>
       {filtered.length ? <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{filtered.map((dataset) => <DatasetCard dataset={dataset} key={dataset.slug} />)}</div> : <div className="mt-5 border border-dashed border-border py-24 text-center"><h2 className="font-display text-xl font-bold">No datasets found</h2><p className="mt-2 text-sm text-muted-foreground">Try a different keyword or clear a filter.</p></div>}
     </section></AppLayout>;
 }

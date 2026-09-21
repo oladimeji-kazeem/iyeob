@@ -28,6 +28,7 @@ export type Dataset = {
   limitations: string[];
   researchQuestions: string[];
   license: string;
+  authors?: string[];
   columns: DatasetColumn[];
   preview: Record<string, string | number>[];
 };

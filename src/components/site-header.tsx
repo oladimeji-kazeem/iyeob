@@ -1,9 +1,11 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Menu, Search, X } from "lucide-react";
 import { useState } from "react";
 
 import logo from "@/assets/iyeob.png.asset.json";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 
 const links = [
   { label: "Datasets", to: "/datasets" as const },
@@ -14,6 +16,16 @@ const links = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleSignOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await signOut();
+    void navigate({ to: "/auth", replace: true });
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-xl">
@@ -47,8 +59,18 @@ export function SiteHeader() {
           <Button variant="ghost" size="icon" aria-label="Search datasets" asChild>
             <Link to="/datasets"><Search /></Link>
           </Button>
-          <Button variant="ghost">Sign in</Button>
-          <Button asChild><Link to="/datasets">Get started</Link></Button>
+          {user ? (
+            <>
+              {isAdmin && <Button variant="ghost" asChild><Link to="/admin">Admin</Link></Button>}
+              <Button variant="ghost" asChild><Link to="/submissions">My submissions</Link></Button>
+              <Button variant="outline" onClick={() => void handleSignOut()}>Sign out</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" asChild><Link to="/auth">Sign in</Link></Button>
+              <Button asChild><Link to="/auth">Get started</Link></Button>
+            </>
+          )}
         </div>
 
         <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((value) => !value)} aria-label="Toggle navigation">
@@ -63,7 +85,17 @@ export function SiteHeader() {
                 {link.label}
               </Link>
             ))}
-            <Button className="mt-3" asChild><Link to="/datasets" onClick={() => setOpen(false)}>Explore datasets</Link></Button>
+            {user && (
+              <Link to="/submissions" onClick={() => setOpen(false)} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted">My submissions</Link>
+            )}
+            {user && isAdmin && (
+              <Link to="/admin" onClick={() => setOpen(false)} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted">Admin</Link>
+            )}
+            {user ? (
+              <Button variant="outline" className="mt-3" onClick={() => { setOpen(false); void handleSignOut(); }}>Sign out</Button>
+            ) : (
+              <Button className="mt-3" asChild><Link to="/auth" onClick={() => setOpen(false)}>Sign in</Link></Button>
+            )}
           </div>
         </nav>
       )}
