@@ -222,13 +222,15 @@ function Block({ title, hint, children }: { title: string; hint: string; childre
 }
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  const id = useId();
+  const control = isValidElement(children) ? cloneElement(children as React.ReactElement<{ id?: string }>, { id }) : children;
   return (
     <div className="space-y-2">
-      <Label>
+      <Label htmlFor={id}>
         {label}
         {required && <span className="ml-1 text-destructive">*</span>}
       </Label>
-      {children}
+      {control}
     </div>
   );
 }
