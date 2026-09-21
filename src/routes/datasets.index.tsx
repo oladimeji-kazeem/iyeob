@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { datasets } from "@/lib/datasets";
 
-export const Route = createFileRoute("/datasets")({
+export const Route = createFileRoute("/datasets/")({
   head: () => ({ meta: [
     { title: "Synthetic Dataset Repository | IYEOB" },
     { name: "description", content: "Search and filter documented synthetic datasets built for Nigerian and African AI research." },
