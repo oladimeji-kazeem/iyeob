@@ -62,6 +62,7 @@ export function SiteHeader() {
           {user ? (
             <>
               {isAdmin && <Button variant="ghost" asChild><Link to="/admin">Admin</Link></Button>}
+              <Button variant="ghost" asChild><Link to="/saved">Saved</Link></Button>
               <Button variant="ghost" asChild><Link to="/submissions">My submissions</Link></Button>
               <Button variant="outline" onClick={() => void handleSignOut()}>Sign out</Button>
             </>
@@ -85,6 +86,9 @@ export function SiteHeader() {
                 {link.label}
               </Link>
             ))}
+            {user && (
+              <Link to="/saved" onClick={() => setOpen(false)} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted">Saved datasets</Link>
+            )}
             {user && (
               <Link to="/submissions" onClick={() => setOpen(false)} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted">My submissions</Link>
             )}

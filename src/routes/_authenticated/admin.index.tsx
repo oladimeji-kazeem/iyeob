@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, Check, Eye, Trash2, X } from "lucide-react";
+import { BarChart3, Check, Eye, ScrollText, Trash2, Users, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -83,7 +83,11 @@ function AdminPage() {
             <h1 className="mt-3 font-display text-4xl font-extrabold">Review queue</h1>
             <p className="mt-3 text-sm text-muted-foreground">Validate documentation, approve for publication, or return with reasons.</p>
           </div>
-          <Button variant="outline" asChild><Link to="/admin/analytics"><BarChart3 />Analytics</Link></Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild><Link to="/admin/analytics"><BarChart3 />Analytics</Link></Button>
+            <Button variant="outline" asChild><Link to="/admin/members"><Users />Administrators</Link></Button>
+            <Button variant="outline" asChild><Link to="/admin/audit"><ScrollText />Audit log</Link></Button>
+          </div>
         </div>
 
         <div className="mt-9 grid gap-4 sm:grid-cols-3">
