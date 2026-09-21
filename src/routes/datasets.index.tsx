@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Download, FileJson, Search, SlidersHorizontal } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Bookmark, BookmarkCheck, Download, FileJson, Search, SlidersHorizontal, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -9,10 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trackEvent } from "@/lib/analytics";
+import { useAuth } from "@/lib/auth";
+import { useBookmarks } from "@/lib/bookmarks";
 import { downloadCatalogSelection } from "@/lib/download";
 import { usePublishedDatasets } from "@/lib/published";
+import { describeSavedSearch, useSavedSearches } from "@/lib/saved-searches";
 
 export const Route = createFileRoute("/datasets/")({
+  validateSearch: (search: Record<string, unknown>): { saved?: string } =>
+    typeof search["saved"] === "string" ? { saved: search["saved"] as string } : {},
   head: () => ({ meta: [
     { title: "Synthetic Dataset Repository | IYEOB" },
     { name: "description", content: "Search and filter documented synthetic datasets built for Nigerian and African AI research." },
@@ -24,18 +29,43 @@ export const Route = createFileRoute("/datasets/")({
 
 function DatasetsPage() {
   const { datasets, isLoading } = usePublishedDatasets();
+  const { saved } = Route.useSearch();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { bookmarks, isBookmarked, toggle } = useBookmarks();
+  const { searches, save } = useSavedSearches();
+
   const [query, setQuery] = useState("");
   const [domain, setDomain] = useState("all");
   const [task, setTask] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
   const [sort, setSort] = useState("quality");
+  const [onlySaved, setOnlySaved] = useState(false);
+  const [appliedSaved, setAppliedSaved] = useState<string | null>(null);
 
   const filters = useMemo(() => ({ domain, task, difficulty, sort }), [domain, task, difficulty, sort]);
 
+  // Re-apply a saved search when arriving from the saved workspace.
+  useEffect(() => {
+    if (!saved || appliedSaved === saved) return;
+    const match = searches.find((row) => row.id === saved);
+    if (!match) return;
+    setQuery(match.query ?? "");
+    setDomain(match.filters?.domain ?? "all");
+    setTask(match.filters?.task ?? "all");
+    setDifficulty(match.filters?.difficulty ?? "all");
+    setSort(match.filters?.sort ?? "quality");
+    setAppliedSaved(saved);
+    toast.success(`Applied saved search “${match.name}”`);
+  }, [saved, searches, appliedSaved]);
+
+  const bookmarkedSlugs = useMemo(() => new Set(bookmarks.map((row) => row.dataset_slug)), [bookmarks]);
+
   const filtered = useMemo(() => datasets.filter((dataset) => {
     const textMatch = `${dataset.title} ${dataset.domain} ${dataset.description}`.toLowerCase().includes(query.toLowerCase());
+    if (onlySaved && !bookmarkedSlugs.has(dataset.slug)) return false;
     return textMatch && (domain === "all" || dataset.domain === domain) && (task === "all" || dataset.task.includes(task)) && (difficulty === "all" || dataset.difficulty === difficulty);
-  }).sort((a, b) => sort === "rows" ? b.rows - a.rows : sort === "newest" ? b.version.localeCompare(a.version) : b.quality - a.quality), [datasets, query, domain, task, difficulty, sort]);
+  }).sort((a, b) => sort === "rows" ? b.rows - a.rows : sort === "newest" ? b.version.localeCompare(a.version) : b.quality - a.quality), [datasets, query, domain, task, difficulty, sort, onlySaved, bookmarkedSlugs]);
 
   // Log search terms and filter combinations for the admin analytics dashboard.
   useEffect(() => {
@@ -55,9 +85,43 @@ function DatasetsPage() {
     toast.success(`${filtered.length} datasets exported with citation metadata`);
   };
 
+  const saveCurrentSearch = () => {
+    const suggestion = query.trim() || (domain !== "all" ? domain : "My dataset search");
+    const name = window.prompt("Name this search", suggestion);
+    if (!name?.trim()) return;
+    save.mutate(
+      { name: name.trim(), query: query.trim(), filters },
+      {
+        onSuccess: () => toast.success("Search saved to your workspace"),
+        onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save this search"),
+      },
+    );
+  };
+
   return <AppLayout><section className="border-b border-border bg-card"><div className="mx-auto max-w-7xl px-5 py-16 lg:px-8"><span className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">Open repository · Nigeria</span><h1 className="mt-3 font-display text-4xl font-extrabold sm:text-5xl">Synthetic datasets, clearly documented.</h1><p className="mt-5 max-w-2xl text-lg leading-7 text-muted-foreground">Discover privacy-preserving datasets for research and model development. No real personal data, ever.</p></div></section>
     <section className="mx-auto max-w-7xl px-5 py-10 lg:px-8">
-      <div className="border border-border bg-card p-4 shadow-sm"><div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search datasets, domains, or use cases" className="h-12 pl-10" aria-label="Search datasets" /></div><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><Filter value={domain} onChange={setDomain} placeholder="Domain" options={["all", ...new Set(datasets.map((d) => d.domain))]} /><Filter value={task} onChange={setTask} placeholder="Task" options={["all", "Classification", "Regression"]} /><Filter value={difficulty} onChange={setDifficulty} placeholder="Difficulty" options={["all", "Beginner", "Intermediate", "Advanced"]} /><Filter value="Nigeria" onChange={() => undefined} placeholder="Country" options={["Nigeria"]} /><Filter value={sort} onChange={setSort} placeholder="Sort" options={["quality", "rows", "newest"]} /></div></div>
+      <div className="border border-border bg-card p-4 shadow-sm"><div className="relative"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" /><Input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search datasets, domains, or use cases" className="h-12 pl-10" aria-label="Search datasets" /></div><div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"><Filter value={domain} onChange={setDomain} placeholder="Domain" options={["all", ...new Set(datasets.map((d) => d.domain))]} /><Filter value={task} onChange={setTask} placeholder="Task" options={["all", "Classification", "Regression"]} /><Filter value={difficulty} onChange={setDifficulty} placeholder="Difficulty" options={["all", "Beginner", "Intermediate", "Advanced"]} /><Filter value="Nigeria" onChange={() => undefined} placeholder="Country" options={["Nigeria"]} /><Filter value={sort} onChange={setSort} placeholder="Sort" options={["quality", "rows", "newest"]} /></div>
+
+        {user && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+            <Button variant="outline" size="sm" onClick={saveCurrentSearch}><Star />Save this search</Button>
+            <Button variant={onlySaved ? "default" : "outline"} size="sm" onClick={() => setOnlySaved((value) => !value)}>
+              {onlySaved ? <BookmarkCheck /> : <Bookmark />}Bookmarked only
+            </Button>
+            {searches.slice(0, 4).map((row) => (
+              <Button
+                key={row.id}
+                variant="ghost"
+                size="sm"
+                title={describeSavedSearch(row)}
+                onClick={() => void navigate({ to: "/datasets", search: { saved: row.id } })}
+              >
+                {row.name}
+              </Button>
+            ))}
+          </div>
+        )}
+      </div>
       <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm font-semibold"><span className="text-primary">{filtered.length}</span> datasets found{isLoading ? " (loading community releases…)" : ""}</p>
         <div className="flex flex-wrap items-center gap-2">
@@ -66,7 +130,24 @@ function DatasetsPage() {
           <Button size="sm" disabled={!filtered.length} onClick={() => exportSelection("csv")}><Download />Download selection</Button>
         </div>
       </div>
-      {filtered.length ? <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{filtered.map((dataset) => <DatasetCard dataset={dataset} key={dataset.slug} />)}</div> : <div className="mt-5 border border-dashed border-border py-24 text-center"><h2 className="font-display text-xl font-bold">No datasets found</h2><p className="mt-2 text-sm text-muted-foreground">Try a different keyword or clear a filter.</p></div>}
+      {filtered.length ? <div className="mt-5 grid gap-5 md:grid-cols-2 lg:grid-cols-3">{filtered.map((dataset) => (
+        <div key={dataset.slug} className="relative">
+          <DatasetCard dataset={dataset} />
+          {user && (
+            <button
+              type="button"
+              aria-label={isBookmarked(dataset.slug) ? `Remove ${dataset.title} from bookmarks` : `Bookmark ${dataset.title}`}
+              className="absolute right-3 top-3 z-10 rounded-full border border-border bg-background/90 p-2 text-muted-foreground transition-colors hover:text-primary"
+              onClick={() => toggle.mutate({ slug: dataset.slug, title: dataset.title }, {
+                onSuccess: (result) => toast.success(result === "added" ? "Bookmarked" : "Bookmark removed"),
+                onError: (error) => toast.error(error instanceof Error ? error.message : "Could not update bookmark"),
+              })}
+            >
+              {isBookmarked(dataset.slug) ? <BookmarkCheck className="size-4 text-primary" /> : <Bookmark className="size-4" />}
+            </button>
+          )}
+        </div>
+      ))}</div> : <div className="mt-5 border border-dashed border-border py-24 text-center"><h2 className="font-display text-xl font-bold">No datasets found</h2><p className="mt-2 text-sm text-muted-foreground">Try a different keyword or clear a filter.</p></div>}
     </section></AppLayout>;
 }
 

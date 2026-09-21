@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          id: string
+          invited_by: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          invited_by?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          invited_by?: string | null
+        }
+        Relationships: []
+      }
       analytics_events: {
         Row: {
           created_at: string
@@ -41,6 +65,66 @@ export type Database = {
           filters?: Json
           id?: string
           search_query?: string | null
+        }
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json
+          entity_id: string | null
+          entity_label: string | null
+          entity_type: string
+          event_type: string
+          id: string
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type: string
+          event_type: string
+          id?: string
+        }
+        Update: {
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type?: string
+          event_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      bookmarks: {
+        Row: {
+          created_at: string
+          dataset_slug: string
+          dataset_title: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dataset_slug: string
+          dataset_title?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dataset_slug?: string
+          dataset_title?: string
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -158,6 +242,33 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_searches: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          name: string
+          query: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name: string
+          query?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name?: string
+          query?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -181,12 +292,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      grant_admin: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      list_workspace_members: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          roles: string[]
+          user_id: string
+        }[]
+      }
+      revoke_admin: { Args: { _user_id: string }; Returns: undefined }
+      write_audit: {
+        Args: {
+          _details: Json
+          _entity_id: string
+          _entity_label: string
+          _entity_type: string
+          _event_type: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

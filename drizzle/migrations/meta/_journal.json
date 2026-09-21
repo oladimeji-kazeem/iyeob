@@ -15,6 +15,13 @@
       "when": 1789962723358,
       "tag": "0001_first_user_becomes_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789969011485,
+      "tag": "0002_admin_management_audit_bookmarks",
+      "breakpoints": true
     }
   ]
 }
