@@ -36,9 +36,9 @@ const DatasetsIndexRoute = DatasetsIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const DatasetsSlugRoute = DatasetsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => DatasetsRoute,
+  id: '/datasets/$slug',
+  path: '/datasets/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -82,6 +82,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DevelopersRoute: typeof DevelopersRoute
   ResearchRoute: typeof ResearchRoute
+  DatasetsSlugRoute: typeof DatasetsSlugRoute
   DatasetsIndexRoute: typeof DatasetsIndexRoute
 }
 
@@ -117,10 +118,10 @@ declare module '@tanstack/react-router' {
     }
     '/datasets/$slug': {
       id: '/datasets/$slug'
-      path: '/$slug'
+      path: '/datasets/$slug'
       fullPath: '/datasets/$slug'
       preLoaderRoute: typeof DatasetsSlugRouteImport
-      parentRoute: typeof DatasetsRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -129,6 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DevelopersRoute: DevelopersRoute,
   ResearchRoute: ResearchRoute,
+  DatasetsSlugRoute: DatasetsSlugRoute,
   DatasetsIndexRoute: DatasetsIndexRoute,
 }
 export const routeTree = rootRouteImport
