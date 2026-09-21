@@ -78,7 +78,9 @@ export function submissionToDataset(row: SubmissionRow): Dataset {
     limitations: splitLines(row.limitations),
     researchQuestions: [],
     license: row.license,
-    authors: row.authors ? row.authors.split(",").map((a) => a.trim()).filter(Boolean) : undefined,
+    ...(row.authors
+      ? { authors: row.authors.split(",").map((a) => a.trim()).filter(Boolean) }
+      : {}),
     columns,
     preview,
   };
