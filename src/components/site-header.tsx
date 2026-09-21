@@ -1,0 +1,72 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Menu, Search, X } from "lucide-react";
+import { useState } from "react";
+
+import logo from "@/assets/iyeob.png.asset.json";
+import { Button } from "@/components/ui/button";
+
+const links = [
+  { label: "Datasets", to: "/datasets" as const },
+  { label: "Research", to: "/research" as const },
+  { label: "Developers", to: "/developers" as const },
+];
+
+export function SiteHeader() {
+  const [open, setOpen] = useState(false);
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 lg:px-8">
+        <Link to="/" className="flex items-center gap-2.5" aria-label="IYEOB home">
+          <img src={logo.url} alt="" className="size-9 object-contain" />
+          <span className="font-display text-xl font-extrabold tracking-normal text-foreground">IYEOB</span>
+        </Link>
+
+        <nav className="hidden items-center gap-8 md:flex" aria-label="Primary navigation">
+          {links.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`text-sm font-medium transition-colors ${pathname === link.to ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <span className="group relative cursor-default text-sm font-medium text-muted-foreground">
+            Models
+            <span className="absolute -right-4 -top-2 size-1.5 rounded-full bg-highlight" />
+          </span>
+          <span className="group relative cursor-default text-sm font-medium text-muted-foreground">
+            APIs
+            <span className="absolute -right-4 -top-2 size-1.5 rounded-full bg-highlight" />
+          </span>
+        </nav>
+
+        <div className="hidden items-center gap-2 md:flex">
+          <Button variant="ghost" size="icon" aria-label="Search datasets" asChild>
+            <Link to="/datasets"><Search /></Link>
+          </Button>
+          <Button variant="ghost">Sign in</Button>
+          <Button asChild><Link to="/datasets">Get started</Link></Button>
+        </div>
+
+        <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((value) => !value)} aria-label="Toggle navigation">
+          {open ? <X /> : <Menu />}
+        </Button>
+      </div>
+      {open && (
+        <nav className="border-t border-border bg-background px-5 py-5 md:hidden" aria-label="Mobile navigation">
+          <div className="mx-auto flex max-w-7xl flex-col gap-1">
+            {links.map((link) => (
+              <Link key={link.to} to={link.to} onClick={() => setOpen(false)} className="rounded-md px-3 py-3 text-sm font-semibold hover:bg-muted">
+                {link.label}
+              </Link>
+            ))}
+            <Button className="mt-3" asChild><Link to="/datasets" onClick={() => setOpen(false)}>Explore datasets</Link></Button>
+          </div>
+        </nav>
+      )}
+    </header>
+  );
+}
