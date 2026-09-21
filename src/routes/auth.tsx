@@ -85,17 +85,17 @@ function AuthPage() {
 
           <TabsContent value="signin">
             <form className="mt-6 space-y-4 border border-border bg-card p-6" onSubmit={signIn}>
-              <Field label="Email"><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-              <Field label="Password"><Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+              <Field label="Email" id="signin-email"><Input id="signin-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
+              <Field label="Password" id="signin-password"><Input id="signin-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
               <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
             </form>
           </TabsContent>
 
           <TabsContent value="signup">
             <form className="mt-6 space-y-4 border border-border bg-card p-6" onSubmit={signUp}>
-              <Field label="Full name"><Input required value={fullName} onChange={(e) => setFullName(e.target.value)} /></Field>
-              <Field label="Email"><Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-              <Field label="Password"><Input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+              <Field label="Full name" id="signup-name"><Input id="signup-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} /></Field>
+              <Field label="Email" id="signup-email"><Input id="signup-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
+              <Field label="Password" id="signup-password"><Input id="signup-password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
               <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating account…" : "Create account"}</Button>
               <p className="text-xs leading-5 text-muted-foreground">New members join as contributors. The first member of a workspace becomes its administrator.</p>
             </form>
@@ -110,10 +110,10 @@ function AuthPage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, id, children }: { label: string; id: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
+      <Label htmlFor={id}>{label}</Label>
       {children}
     </div>
   );
