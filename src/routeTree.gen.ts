@@ -15,10 +15,13 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DevelopersRouteImport } from './routes/developers'
 import { Route as ResearchRouteImport } from './routes/research'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedSavedRouteImport } from './routes/_authenticated/saved'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets.index'
 import { Route as DatasetsSlugRouteImport } from './routes/datasets.$slug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
+import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin.audit'
+import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
 import { Route as AuthenticatedSubmissionsIndexRouteImport } from './routes/_authenticated/submissions.index'
 import { Route as AuthenticatedSubmissionsIdRouteImport } from './routes/_authenticated/submissions.$id'
 import { Route as AuthenticatedSubmissionsNewRouteImport } from './routes/_authenticated/submissions.new'
@@ -52,6 +55,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSavedRoute = AuthenticatedSavedRouteImport.update({
+  id: '/saved',
+  path: '/saved',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const DatasetsIndexRoute = DatasetsIndexRouteImport.update({
   id: '/datasets/',
   path: '/datasets/',
@@ -71,6 +79,17 @@ const AuthenticatedAdminAnalyticsRoute =
   AuthenticatedAdminAnalyticsRouteImport.update({
     id: '/analytics',
     path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminMembersRoute =
+  AuthenticatedAdminMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedSubmissionsIndexRoute =
@@ -98,9 +117,12 @@ export interface FileRoutesByFullPath {
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/saved': typeof AuthenticatedSavedRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/audit': typeof AuthenticatedAdminAuditRoute
+  '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
   '/submissions/new': typeof AuthenticatedSubmissionsNewRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -111,9 +133,12 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
+  '/saved': typeof AuthenticatedSavedRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets': typeof DatasetsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/admin/audit': typeof AuthenticatedAdminAuditRoute
+  '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
   '/submissions/new': typeof AuthenticatedSubmissionsNewRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -127,9 +152,12 @@ export interface FileRoutesById {
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
+  '/_authenticated/saved': typeof AuthenticatedSavedRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets/': typeof DatasetsIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
+  '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
+  '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
   '/_authenticated/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
   '/_authenticated/submissions/new': typeof AuthenticatedSubmissionsNewRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -143,9 +171,12 @@ export interface FileRouteTypes {
     | '/developers'
     | '/research'
     | '/admin'
+    | '/saved'
     | '/datasets/$slug'
     | '/datasets/'
     | '/admin/analytics'
+    | '/admin/audit'
+    | '/admin/members'
     | '/submissions/$id'
     | '/submissions/new'
     | '/admin/'
@@ -156,9 +187,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/developers'
     | '/research'
+    | '/saved'
     | '/datasets/$slug'
     | '/datasets'
     | '/admin/analytics'
+    | '/admin/audit'
+    | '/admin/members'
     | '/submissions/$id'
     | '/submissions/new'
     | '/admin'
@@ -171,9 +205,12 @@ export interface FileRouteTypes {
     | '/developers'
     | '/research'
     | '/_authenticated/admin'
+    | '/_authenticated/saved'
     | '/datasets/$slug'
     | '/datasets/'
     | '/_authenticated/admin/analytics'
+    | '/_authenticated/admin/audit'
+    | '/_authenticated/admin/members'
     | '/_authenticated/submissions/$id'
     | '/_authenticated/submissions/new'
     | '/_authenticated/admin/'
@@ -234,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/saved': {
+      id: '/_authenticated/saved'
+      path: '/saved'
+      fullPath: '/saved'
+      preLoaderRoute: typeof AuthenticatedSavedRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/datasets/': {
       id: '/datasets/'
       path: '/datasets'
@@ -262,6 +306,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/audit': {
+      id: '/_authenticated/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/members': {
+      id: '/_authenticated/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AuthenticatedAdminMembersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/submissions/': {
       id: '/_authenticated/submissions/'
       path: '/submissions'
@@ -288,11 +346,15 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
+  AuthenticatedAdminMembersRoute: typeof AuthenticatedAdminMembersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
+  AuthenticatedAdminMembersRoute: AuthenticatedAdminMembersRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
@@ -301,6 +363,7 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
+  AuthenticatedSavedRoute: typeof AuthenticatedSavedRoute
   AuthenticatedSubmissionsIdRoute: typeof AuthenticatedSubmissionsIdRoute
   AuthenticatedSubmissionsNewRoute: typeof AuthenticatedSubmissionsNewRoute
   AuthenticatedSubmissionsIndexRoute: typeof AuthenticatedSubmissionsIndexRoute
@@ -308,6 +371,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
+  AuthenticatedSavedRoute: AuthenticatedSavedRoute,
   AuthenticatedSubmissionsIdRoute: AuthenticatedSubmissionsIdRoute,
   AuthenticatedSubmissionsNewRoute: AuthenticatedSubmissionsNewRoute,
   AuthenticatedSubmissionsIndexRoute: AuthenticatedSubmissionsIndexRoute,
