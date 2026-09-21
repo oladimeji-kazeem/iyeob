@@ -1,5 +1,5 @@
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { cloneElement, isValidElement, useId, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
