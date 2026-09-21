@@ -1,9 +1,11 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Menu, Search, X } from "lucide-react";
 import { useState } from "react";
 
 import logo from "@/assets/iyeob.png.asset.json";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth";
 
 const links = [
   { label: "Datasets", to: "/datasets" as const },
@@ -14,6 +16,16 @@ const links = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const handleSignOut = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await signOut();
+    void navigate({ to: "/auth", replace: true });
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-xl">
