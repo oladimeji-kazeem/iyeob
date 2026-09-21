@@ -14,8 +14,11 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DevelopersRouteImport } from './routes/developers'
 import { Route as ResearchRouteImport } from './routes/research'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets.index'
 import { Route as DatasetsSlugRouteImport } from './routes/datasets.$slug'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedSubmissionsIndexRouteImport } from './routes/_authenticated/submissions.index'
 import { Route as AuthenticatedSubmissionsIdRouteImport } from './routes/_authenticated/submissions.$id'
 import { Route as AuthenticatedSubmissionsNewRouteImport } from './routes/_authenticated/submissions.new'
@@ -44,6 +47,11 @@ const ResearchRoute = ResearchRouteImport.update({
   path: '/research',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const DatasetsIndexRoute = DatasetsIndexRouteImport.update({
   id: '/datasets/',
   path: '/datasets/',
@@ -54,6 +62,17 @@ const DatasetsSlugRoute = DatasetsSlugRouteImport.update({
   path: '/datasets/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedSubmissionsIndexRoute =
   AuthenticatedSubmissionsIndexRouteImport.update({
     id: '/submissions/',
@@ -78,10 +97,13 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets/': typeof DatasetsIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
   '/submissions/new': typeof AuthenticatedSubmissionsNewRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/submissions/': typeof AuthenticatedSubmissionsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -91,8 +113,10 @@ export interface FileRoutesByTo {
   '/research': typeof ResearchRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets': typeof DatasetsIndexRoute
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
   '/submissions/new': typeof AuthenticatedSubmissionsNewRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/submissions': typeof AuthenticatedSubmissionsIndexRoute
 }
 export interface FileRoutesById {
@@ -102,10 +126,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets/': typeof DatasetsIndexRoute
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
   '/_authenticated/submissions/new': typeof AuthenticatedSubmissionsNewRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/submissions/': typeof AuthenticatedSubmissionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -115,10 +142,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/developers'
     | '/research'
+    | '/admin'
     | '/datasets/$slug'
     | '/datasets/'
+    | '/admin/analytics'
     | '/submissions/$id'
     | '/submissions/new'
+    | '/admin/'
     | '/submissions/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -128,8 +158,10 @@ export interface FileRouteTypes {
     | '/research'
     | '/datasets/$slug'
     | '/datasets'
+    | '/admin/analytics'
     | '/submissions/$id'
     | '/submissions/new'
+    | '/admin'
     | '/submissions'
   id:
     | '__root__'
@@ -138,10 +170,13 @@ export interface FileRouteTypes {
     | '/auth'
     | '/developers'
     | '/research'
+    | '/_authenticated/admin'
     | '/datasets/$slug'
     | '/datasets/'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/submissions/$id'
     | '/_authenticated/submissions/new'
+    | '/_authenticated/admin/'
     | '/_authenticated/submissions/'
   fileRoutesById: FileRoutesById
 }
@@ -192,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/datasets/': {
       id: '/datasets/'
       path: '/datasets'
@@ -205,6 +247,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/datasets/$slug'
       preLoaderRoute: typeof DatasetsSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/submissions/': {
       id: '/_authenticated/submissions/'
@@ -230,13 +286,28 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedSubmissionsIdRoute: typeof AuthenticatedSubmissionsIdRoute
   AuthenticatedSubmissionsNewRoute: typeof AuthenticatedSubmissionsNewRoute
   AuthenticatedSubmissionsIndexRoute: typeof AuthenticatedSubmissionsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedSubmissionsIdRoute: AuthenticatedSubmissionsIdRoute,
   AuthenticatedSubmissionsNewRoute: AuthenticatedSubmissionsNewRoute,
   AuthenticatedSubmissionsIndexRoute: AuthenticatedSubmissionsIndexRoute,
