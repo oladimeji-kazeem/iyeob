@@ -12,7 +12,8 @@
     "format": "prettier --write ."
   },
   "overrides": {
-    "rolldown": "1.2.1"
+    "rolldown": "1.2.1",
+    "esbuild": "^0.25.4"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

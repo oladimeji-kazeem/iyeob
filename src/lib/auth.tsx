@@ -3,7 +3,16 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "admin" | "contributor";
+export type AppRole =
+  | "admin"
+  | "contributor"
+  | "data_editor"
+  | "editor"
+  | "reviewer"
+  | "publisher"
+  | "researcher"
+  | "developer"
+  | "user";
 
 type AuthValue = {
   session: Session | null;
@@ -37,7 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-      if (active) setRoles((data ?? []).map((row) => row.role as AppRole));
+      if (active) {
+        const parsed = (data ?? []).map((row) => (row.role?.toLowerCase() ?? "user") as AppRole);
+        setRoles(parsed);
+      }
     };
 
     supabase.auth.getSession().then(async ({ data }) => {
@@ -63,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       roles,
-      isAdmin: roles.includes("admin"),
+      isAdmin: roles.some((r) => r.toLowerCase() === "admin"),
       loading,
       signOut: async () => {
         await supabase.auth.signOut();

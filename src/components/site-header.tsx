@@ -3,7 +3,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Menu, Search, X } from "lucide-react";
 import { useState } from "react";
 
-import logo from "@/assets/iyeob.png.asset.json";
+import logo from "@/assets/iyeob.png";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 
@@ -31,7 +31,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/90 backdrop-blur-xl">
       <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-5 lg:px-8">
         <Link to="/" className="flex items-center gap-2.5" aria-label="IYEOB home">
-          <img src={logo.url} alt="" className="size-9 object-contain" />
+          <img src={logo} alt="IYEOB logo" className="size-9 object-contain" />
           <span className="font-display text-xl font-extrabold tracking-normal text-foreground">IYEOB</span>
         </Link>
 
