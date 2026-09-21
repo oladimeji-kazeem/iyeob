@@ -47,8 +47,18 @@ export function SiteHeader() {
           <Button variant="ghost" size="icon" aria-label="Search datasets" asChild>
             <Link to="/datasets"><Search /></Link>
           </Button>
-          <Button variant="ghost">Sign in</Button>
-          <Button asChild><Link to="/datasets">Get started</Link></Button>
+          {user ? (
+            <>
+              {isAdmin && <Button variant="ghost" asChild><Link to="/admin">Admin</Link></Button>}
+              <Button variant="ghost" asChild><Link to="/submissions">My submissions</Link></Button>
+              <Button variant="outline" onClick={() => void handleSignOut()}>Sign out</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" asChild><Link to="/auth">Sign in</Link></Button>
+              <Button asChild><Link to="/auth">Get started</Link></Button>
+            </>
+          )}
         </div>
 
         <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen((value) => !value)} aria-label="Toggle navigation">
