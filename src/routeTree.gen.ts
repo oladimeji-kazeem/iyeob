@@ -10,14 +10,28 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DevelopersRouteImport } from './routes/developers'
 import { Route as ResearchRouteImport } from './routes/research'
 import { Route as DatasetsIndexRouteImport } from './routes/datasets.index'
 import { Route as DatasetsSlugRouteImport } from './routes/datasets.$slug'
+import { Route as AuthenticatedSubmissionsIndexRouteImport } from './routes/_authenticated/submissions.index'
+import { Route as AuthenticatedSubmissionsIdRouteImport } from './routes/_authenticated/submissions.$id'
+import { Route as AuthenticatedSubmissionsNewRouteImport } from './routes/_authenticated/submissions.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevelopersRoute = DevelopersRouteImport.update({
@@ -40,46 +54,101 @@ const DatasetsSlugRoute = DatasetsSlugRouteImport.update({
   path: '/datasets/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedSubmissionsIndexRoute =
+  AuthenticatedSubmissionsIndexRouteImport.update({
+    id: '/submissions/',
+    path: '/submissions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSubmissionsIdRoute =
+  AuthenticatedSubmissionsIdRouteImport.update({
+    id: '/submissions/$id',
+    path: '/submissions/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSubmissionsNewRoute =
+  AuthenticatedSubmissionsNewRouteImport.update({
+    id: '/submissions/new',
+    path: '/submissions/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets/': typeof DatasetsIndexRoute
+  '/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
+  '/submissions/new': typeof AuthenticatedSubmissionsNewRoute
+  '/submissions/': typeof AuthenticatedSubmissionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets': typeof DatasetsIndexRoute
+  '/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
+  '/submissions/new': typeof AuthenticatedSubmissionsNewRoute
+  '/submissions': typeof AuthenticatedSubmissionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
   '/datasets/': typeof DatasetsIndexRoute
+  '/_authenticated/submissions/$id': typeof AuthenticatedSubmissionsIdRoute
+  '/_authenticated/submissions/new': typeof AuthenticatedSubmissionsNewRoute
+  '/_authenticated/submissions/': typeof AuthenticatedSubmissionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/developers' | '/research' | '/datasets/$slug' | '/datasets/'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/developers' | '/research' | '/datasets/$slug' | '/datasets'
-  id:
-    | '__root__'
     | '/'
+    | '/auth'
     | '/developers'
     | '/research'
     | '/datasets/$slug'
     | '/datasets/'
+    | '/submissions/$id'
+    | '/submissions/new'
+    | '/submissions/'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/auth'
+    | '/developers'
+    | '/research'
+    | '/datasets/$slug'
+    | '/datasets'
+    | '/submissions/$id'
+    | '/submissions/new'
+    | '/submissions'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/developers'
+    | '/research'
+    | '/datasets/$slug'
+    | '/datasets/'
+    | '/_authenticated/submissions/$id'
+    | '/_authenticated/submissions/new'
+    | '/_authenticated/submissions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   DevelopersRoute: typeof DevelopersRoute
   ResearchRoute: typeof ResearchRoute
   DatasetsSlugRoute: typeof DatasetsSlugRoute
@@ -93,6 +162,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/developers': {
@@ -123,11 +206,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DatasetsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/submissions/': {
+      id: '/_authenticated/submissions/'
+      path: '/submissions'
+      fullPath: '/submissions/'
+      preLoaderRoute: typeof AuthenticatedSubmissionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/submissions/$id': {
+      id: '/_authenticated/submissions/$id'
+      path: '/submissions/$id'
+      fullPath: '/submissions/$id'
+      preLoaderRoute: typeof AuthenticatedSubmissionsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/submissions/new': {
+      id: '/_authenticated/submissions/new'
+      path: '/submissions/new'
+      fullPath: '/submissions/new'
+      preLoaderRoute: typeof AuthenticatedSubmissionsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedSubmissionsIdRoute: typeof AuthenticatedSubmissionsIdRoute
+  AuthenticatedSubmissionsNewRoute: typeof AuthenticatedSubmissionsNewRoute
+  AuthenticatedSubmissionsIndexRoute: typeof AuthenticatedSubmissionsIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedSubmissionsIdRoute: AuthenticatedSubmissionsIdRoute,
+  AuthenticatedSubmissionsNewRoute: AuthenticatedSubmissionsNewRoute,
+  AuthenticatedSubmissionsIndexRoute: AuthenticatedSubmissionsIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   DevelopersRoute: DevelopersRoute,
   ResearchRoute: ResearchRoute,
   DatasetsSlugRoute: DatasetsSlugRoute,
