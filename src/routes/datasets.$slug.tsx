@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, Check, Copy, Database, Download, FileJson, Search, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Copy, Database, Download, FileJson, Search, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 

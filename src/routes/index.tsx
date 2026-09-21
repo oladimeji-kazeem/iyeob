@@ -21,10 +21,10 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   return (
     <AppLayout>
-      <section className="hero-atmosphere relative min-h-[calc(100vh-4.5rem)] overflow-hidden text-primary-foreground">
+      <section className="hero-atmosphere relative min-h-[680px] overflow-hidden text-primary-foreground lg:h-[calc(100vh-4.5rem)] lg:max-h-[900px]">
         <div className="data-grid absolute inset-0 opacity-40" />
         <DataNetwork />
-        <div className="relative mx-auto flex min-h-[calc(100vh-4.5rem)] max-w-7xl items-center px-5 py-20 lg:px-8">
+        <div className="relative mx-auto flex min-h-[680px] max-w-7xl items-center px-5 py-20 lg:h-full lg:min-h-0 lg:px-8">
           <div className="max-w-3xl">
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider backdrop-blur">
               <ShieldCheck className="size-4 text-highlight" /> Zero real personal data
