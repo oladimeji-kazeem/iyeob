@@ -10,19 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DatasetsRouteImport } from './routes/datasets'
 import { Route as DevelopersRouteImport } from './routes/developers'
 import { Route as ResearchRouteImport } from './routes/research'
+import { Route as DatasetsIndexRouteImport } from './routes/datasets.index'
 import { Route as DatasetsSlugRouteImport } from './routes/datasets.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DatasetsRoute = DatasetsRouteImport.update({
-  id: '/datasets',
-  path: '/datasets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DevelopersRoute = DevelopersRouteImport.update({
@@ -35,6 +30,11 @@ const ResearchRoute = ResearchRouteImport.update({
   path: '/research',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DatasetsIndexRoute = DatasetsIndexRouteImport.update({
+  id: '/datasets/',
+  path: '/datasets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DatasetsSlugRoute = DatasetsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -43,45 +43,46 @@ const DatasetsSlugRoute = DatasetsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/datasets': typeof DatasetsRouteWithChildren
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
+  '/datasets/': typeof DatasetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/datasets': typeof DatasetsRouteWithChildren
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
+  '/datasets': typeof DatasetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/datasets': typeof DatasetsRouteWithChildren
   '/developers': typeof DevelopersRoute
   '/research': typeof ResearchRoute
   '/datasets/$slug': typeof DatasetsSlugRoute
+  '/datasets/': typeof DatasetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/datasets' | '/developers' | '/research' | '/datasets/$slug'
+  fullPaths:
+    '/' | '/developers' | '/research' | '/datasets/$slug' | '/datasets/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/datasets' | '/developers' | '/research' | '/datasets/$slug'
+  to: '/' | '/developers' | '/research' | '/datasets/$slug' | '/datasets'
   id:
     | '__root__'
     | '/'
-    | '/datasets'
     | '/developers'
     | '/research'
     | '/datasets/$slug'
+    | '/datasets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DatasetsRoute: typeof DatasetsRouteWithChildren
   DevelopersRoute: typeof DevelopersRoute
   ResearchRoute: typeof ResearchRoute
+  DatasetsIndexRoute: typeof DatasetsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -91,13 +92,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/datasets': {
-      id: '/datasets'
-      path: '/datasets'
-      fullPath: '/datasets'
-      preLoaderRoute: typeof DatasetsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/developers': {
@@ -114,6 +108,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/datasets/': {
+      id: '/datasets/'
+      path: '/datasets'
+      fullPath: '/datasets/'
+      preLoaderRoute: typeof DatasetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/datasets/$slug': {
       id: '/datasets/$slug'
       path: '/$slug'
@@ -124,23 +125,11 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface DatasetsRouteChildren {
-  DatasetsSlugRoute: typeof DatasetsSlugRoute
-}
-
-const DatasetsRouteChildren: DatasetsRouteChildren = {
-  DatasetsSlugRoute: DatasetsSlugRoute,
-}
-
-const DatasetsRouteWithChildren = DatasetsRoute._addFileChildren(
-  DatasetsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DatasetsRoute: DatasetsRouteWithChildren,
   DevelopersRoute: DevelopersRoute,
   ResearchRoute: ResearchRoute,
+  DatasetsIndexRoute: DatasetsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
