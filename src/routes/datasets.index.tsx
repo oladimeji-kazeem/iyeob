@@ -16,9 +16,8 @@ import { usePublishedDatasets } from "@/lib/published";
 import { describeSavedSearch, useSavedSearches } from "@/lib/saved-searches";
 
 export const Route = createFileRoute("/datasets/")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    saved: typeof search["saved"] === "string" ? (search["saved"] as string) : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { saved?: string } =>
+    typeof search["saved"] === "string" ? { saved: search["saved"] as string } : {},
   head: () => ({ meta: [
     { title: "Synthetic Dataset Repository | IYEOB" },
     { name: "description", content: "Search and filter documented synthetic datasets built for Nigerian and African AI research." },
