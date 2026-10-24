@@ -30,9 +30,18 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [activeTab, setActiveTab] = useState("signin");
+  const [recoveryMode, setRecoveryMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [fullName, setFullName] = useState("");
+
+  useState(() => {
+    if (typeof window !== "undefined" && window.location.hash.includes("type=recovery")) {
+      setRecoveryMode(true);
+    }
+  });
 
   const signIn = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -68,6 +77,34 @@ function AuthPage() {
     toast.success("Check your email to confirm your account.");
   };
 
+  const requestPasswordReset = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Password reset instructions sent! Check your inbox.");
+  };
+
+  const handleUpdatePassword = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Password updated successfully. You are now signed in.");
+    setRecoveryMode(false);
+    void navigate({ to: "/submissions" });
+  };
+
   return (
     <AppLayout>
       <section className="mx-auto max-w-md px-5 py-20">
@@ -77,30 +114,77 @@ function AuthPage() {
           Members submit documented synthetic datasets. Administrators review, approve, and publish them.
         </p>
 
-        <Tabs defaultValue="signin" className="mt-8">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="signin">Sign in</TabsTrigger>
-            <TabsTrigger value="signup">Create account</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="signin">
-            <form className="mt-6 space-y-4 border border-border bg-card p-6" onSubmit={signIn}>
-              <Field label="Email" id="signin-email"><Input id="signin-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-              <Field label="Password" id="signin-password"><Input id="signin-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
-              <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
+        {recoveryMode ? (
+          <div className="mt-8 border border-border bg-card p-6 shadow-sm">
+            <h2 className="text-lg font-bold">Set New Password</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Enter your new workspace password below.
+            </p>
+            <form className="mt-4 space-y-4" onSubmit={handleUpdatePassword}>
+              <Field label="New Password" id="recovery-new-password">
+                <Input
+                  id="recovery-new-password"
+                  type="password"
+                  required
+                  minLength={8}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Minimum 8 characters"
+                />
+              </Field>
+              <Button type="submit" className="w-full" disabled={busy}>
+                {busy ? "Updating password…" : "Update Password"}
+              </Button>
             </form>
-          </TabsContent>
+          </div>
+        ) : (
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="signin">Sign in</TabsTrigger>
+              <TabsTrigger value="signup">Register</TabsTrigger>
+              <TabsTrigger value="reset">Reset</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="signup">
-            <form className="mt-6 space-y-4 border border-border bg-card p-6" onSubmit={signUp}>
-              <Field label="Full name" id="signup-name"><Input id="signup-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} /></Field>
-              <Field label="Email" id="signup-email"><Input id="signup-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-              <Field label="Password" id="signup-password"><Input id="signup-password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
-              <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating account…" : "Create account"}</Button>
-              <p className="text-xs leading-5 text-muted-foreground">New members join as contributors. The first member of a workspace becomes its administrator.</p>
-            </form>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="signin">
+              <form className="mt-6 space-y-4 border border-border bg-card p-6" onSubmit={signIn}>
+                <Field label="Email" id="signin-email"><Input id="signin-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
+                <Field label="Password" id="signin-password"><Input id="signin-password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("reset")}
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <Button type="submit" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="signup">
+              <form className="mt-6 space-y-4 border border-border bg-card p-6" onSubmit={signUp}>
+                <Field label="Full name" id="signup-name"><Input id="signup-name" required value={fullName} onChange={(e) => setFullName(e.target.value)} /></Field>
+                <Field label="Email" id="signup-email"><Input id="signup-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
+                <Field label="Password" id="signup-password"><Input id="signup-password" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+                <Button type="submit" className="w-full" disabled={busy}>{busy ? "Creating account…" : "Create account"}</Button>
+                <p className="text-xs leading-5 text-muted-foreground">New members join as contributors. The first member of a workspace becomes its administrator.</p>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="reset">
+              <form className="mt-6 space-y-4 border border-border bg-card p-6" onSubmit={requestPasswordReset}>
+                <Field label="Account Email" id="reset-email">
+                  <Input id="reset-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" />
+                </Field>
+                <Button type="submit" className="w-full" disabled={busy}>{busy ? "Sending link…" : "Send Reset Link"}</Button>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  We'll email you a secure link to reset your password.
+                </p>
+              </form>
+            </TabsContent>
+          </Tabs>
+        )}
 
         <p className="mt-8 text-sm text-muted-foreground">
           Just browsing? <Link to="/datasets" className="font-semibold text-primary">Explore the repository</Link>.
